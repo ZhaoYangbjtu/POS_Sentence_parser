@@ -1,0 +1,29 @@
+python preprocess.py train.trees > train.trees.pre
+#binarization of the input
+
+python postprocess.py train.trees.pre > rev #check if rev==train.trees 
+#not imp -> just turns this back to non-binarized tree
+
+python unknown.py train.trees.pre > train.trees.pre.unk
+#replace words occuring only once with <unk> -> kind of ignoring those words 
+
+python demogrammar.py --infile train.trees.pre.unk --outfile demogrammar
+#generate PCFG from this processed train trees 
+
+python rbranch.py -i dev.strings -o dev.parses -g demogrammar
+#change the rbranch.py to take your grammar and produce a tree of highest probability in binarized format
+
+python postprocess.py dev.parses > dev.parses.post
+#turns this back to non-binarized tree
+
+python evalb.py dev.parses.post dev.trees
+#evaluate parsed output against the input from which the parse tree was obtained.
+
+
+
+python $SCRIPTDIR/preprocess.py $TRAINING > train.trees.pre
+python $SCRIPTDIR/unknown.py train.trees.pre > train.trees.pre.unk
+python $SCRIPTDIR/demogrammar.py --infile train.trees.pre.unk --outfile demogrammar
+python $SCRIPTDIR/rbranch.py -i $INPUT -o dev.parses -g demogrammar
+python $SCRIPTDIR/postprocess.py dev.parses > $OUTPUT
+
